@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "runpod-orchestrator"
+version = "0.1.0"
+description = "Async Runpod Orchestrator for Sage and Hashcat instances"
+readme = "README.md"
+requires-python = ">=3.8.0"
+dependencies = [
+    "aiohttp>=3.13.2",
+    "typer>=0.20.1",
+    "rich>=14.2.0",
+    "pexpect>=4.9.0",
+    "pwnlogger @ git+https://github.com/Eudaeon/pwnlogger.git"
+]
+license = {text = "MIT"}
+authors = [
+    {name = "Eudaeon"}
+]
+keywords = ["runpod", "orchestration", "cpu", "sagemath", "gpu", "hashcat"]
+
+[project.urls]
+Homepage = "https://github.com/Eudaeon/runpod-orchestrator"
+"Bug Reports" = "https://github.com/Eudaeon/runpod-orchestrator/issues"
+Source = "https://github.com/Eudaeon/runpod-orchestrator"
+
+[project.scripts]
+runpod-orchestrator = "runpod_orchestrator.main:app"
