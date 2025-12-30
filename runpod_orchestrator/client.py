@@ -21,6 +21,12 @@ class RunpodClient:
         async with self.session.post(
             url, cookies={"__client": CLERK_COOKIE}, data={"organization_id": ""}
         ) as resp:
+            if resp.status == 404:
+                raise Exception("Session error: check RUNPOD_SESSION_ID")
+
+            if resp.status == 401:
+                raise Exception("Authentication error: check RUNPOD_CLERK_COOKIE")
+
             resp.raise_for_status()
             data = await resp.json()
             return data["jwt"]
@@ -69,3 +75,59 @@ class RunpodClient:
             for gpu in res["data"]["gpuTypes"]
             if gpu["manufacturer"].lower() == "nvidia" and gpu["secureCloud"] is True
         ]
+
+    async def get_pod_template_args(self, template_id: str) -> str:
+        """Fetches the dockerArgs for a specific template."""
+        query = (
+            "query getPodTemplate($id: String!) { podTemplate(id: $id) { dockerArgs } }"
+        )
+        res = await self.query(query, {"id": template_id})
+        return res["data"]["podTemplate"].get("dockerArgs", "")
+
+    async def get_balance(self) -> float:
+        """Retrieves the current user balance."""
+        res = await self.query("{ myself { clientBalance } }")
+        return float(res["data"]["myself"]["clientBalance"])
+
+    async def deploy_pod(self, input_data: Dict[str, Any], is_gpu: bool) -> str:
+        """Deploys a pod and handles availability errors."""
+        if is_gpu:
+            q = "mutation Mutation($input: PodFindAndDeployOnDemandInput) { podFindAndDeployOnDemand(input: $input) { id } }"
+            key = "podFindAndDeployOnDemand"
+        else:
+            q = "mutation Mutation($input: deployCpuPodInput!) { deployCpuPod(input: $input) { id } }"
+            key = "deployCpuPod"
+
+        res = await self.query(q, {"input": input_data})
+
+        if "errors" in res:
+            for error in res["errors"]:
+                if "no longer any instances available" in error.get("message", ""):
+                    raise Exception("No instances available")
+
+        if not res.get("data") or not res["data"].get(key):
+            raise Exception(f"Failed to create pod: {res.get('errors')}")
+
+        return res["data"][key]["id"]
+
+    async def get_pod_details(self, pod_id: str) -> Dict[str, Any]:
+        """Fetches detailed metadata for a specific pod."""
+        query = """
+        query podDetailedInspector($input: PodFilter) {
+          pod(input: $input) {
+            costPerHr
+            machine { 
+              dataCenterId 
+              cpuType { displayName } 
+              gpuType { displayName } 
+            }
+          }
+        }
+        """
+        res = await self.query(query, {"input": {"podId": pod_id}})
+        return res["data"]["pod"]
+
+    async def terminate_pod(self, pod_id: str):
+        """Terminates a running pod."""
+        query = "mutation terminate($input: PodTerminateInput!) { podTerminate(input: $input) }"
+        await self.query(query, {"input": {"podId": pod_id}})
