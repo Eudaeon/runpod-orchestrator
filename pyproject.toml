@@ -15,10 +15,10 @@ dependencies = [
     "pexpect>=4.9.0",
     "pwnlogger @ git+https://github.com/Eudaeon/pwnlogger.git"
 ]
-license = {text = "MIT"}
 authors = [
     {name = "Eudaeon"}
 ]
+license = "MIT"
 keywords = ["runpod", "orchestration", "cpu", "sagemath", "gpu", "hashcat"]
 
 [project.urls]
