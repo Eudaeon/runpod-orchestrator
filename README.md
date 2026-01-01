@@ -35,7 +35,6 @@ This tool automatically terminates the rented instances on exit to ensure optima
 pip install git+https://github.com/Eudaeon/runpod-orchestrator.git
 ```
 
-
 ## 🔧 Usage
 
 ### SageMath (CPU)
@@ -75,11 +74,15 @@ The tool validates your requested core count against Runpod's available inventor
 
 The orchestrator requires the following variables to be set in your environment:
 
+<div align="center">
+
 |        Variable       |                      Description                      |
 |:---------------------:|:-----------------------------------------------------:|
 |  `RUNPOD_SESSION_ID`  |             Your Runpod Clerk session ID.             |
 | `RUNPOD_CLERK_COOKIE` |     The `__client` cookie value from Runpod Clerk.    |
 |        `VPS_IP`       | The public IP of your VPS for the reverse connection. |
+
+</div>
 
 > [!TIP]
 > To find your `RUNPOD_SESSION_ID` and `RUNPOD_CLERK_COOKIE`, inspect network requests to `clerk.runpod.io` in your browser's developer tools.
@@ -89,6 +92,8 @@ The orchestrator requires the following variables to be set in your environment:
 ### Hashcat (GPU)
 
 Benchmarks for cracking MD4 hashes (`hashcat -b -w 4`) on secure cloud instances:
+
+<div align="center">
 
 |       Name      |    Speed    | Price/h |    Hash/$   |
 |:---------------:|:-----------:|:-------:|:-----------:|
@@ -117,6 +122,7 @@ Benchmarks for cracking MD4 hashes (`hashcat -b -w 4`) on secure cloud instances
 |   RTX PRO 6000  | 121.80 GH/s |  $1.84  |  66.20 GH/$ |
 | RTX PRO 6000 WK | 140.60 GH/s |  $2.09  |  67.27 GH/$ |
 
+</div>
 
 ---
 
