@@ -26,8 +26,8 @@ This tool automatically terminates the rented instances on exit to ensure optima
 > [!IMPORTANT]
 > This tool must be run from a VPS with a public IP. It operates by starting a local web server to serve binaries and listening for incoming reverse SSH connections.
 
-* **Filesystem**: Ensure the [`reverse-ssh`](https://github.com/Fahrj/reverse-ssh) binary is located at `/workspace/tooling/upx_reverse-sshx64` on your VPS. The binary should be built with public key access, and the corresponding private key must be present on the VPS.
-* **Networking**: The orchestrator opens a local web server on port 80 and a listener on port 8889, so your firewall should accept connections to these ports.
+- **Filesystem**: Ensure the [`reverse-ssh`](https://github.com/Fahrj/reverse-ssh) binary is located at `/workspace/tooling/upx_reverse-sshx64` on your VPS. The binary should be built with public key access, and the corresponding private key must be present on the VPS.
+- **Networking**: The orchestrator opens a local web server on port 80 and a listener on port 8889, so your firewall should accept connections to these ports.
 
 ### Installation
 
