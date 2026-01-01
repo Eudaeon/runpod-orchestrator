@@ -1,35 +1,79 @@
 # Runpod Orchestrator
 
-An asynchronous CLI tool to deploy and manage SageMath and Hashcat instances on Runpod with automated reverse SSH tunneling.
+<div align="center">
 
-## Features
+[![GitHub stars](https://img.shields.io/github/stars/Eudaeon/runpod-orchestrator?style=for-the-badge)](https://github.com/Eudaeon/runpod-orchestrator/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/Eudaeon/runpod-orchestrator?style=for-the-badge)](https://github.com/Eudaeon/runpod-orchestrator/network)
+[![GitHub issues](https://img.shields.io/github/issues/Eudaeon/runpod-orchestrator?style=for-the-badge)](https://github.com/Eudaeon/runpod-orchestrator/issues)
+[![GitHub license](https://img.shields.io/github/license/Eudaeon/runpod-orchestrator?style=for-the-badge)](LICENSE)
 
-- Handles pod creation, connection establishment, and automatic termination upon exit to ensure you only pay for what you use.
-- Injects a payload into the pod to bypass network restrictions and establish a secure connection back to your VPS.
-- Automatically `scp` local files to the pod's `/workspace` directory during deployment.
-- Validates GPU models and core counts against Runpod's available inventory before deployment.
-- Provides an interactive shell that drops you directly into a proxied SSH session once the tunnel is established.
+**A CLI tool to streamline the deployment of Sage and Hashcat instances on Runpod, with automated reverse SSH tunneling.**
 
-## Setup
+</div>
+
+## 📖 Overview
+
+This CLI tool is designed to simplify the interaction with the Runpod cloud platform for specific compute-intensive tasks. It enables users to effortlessly deploy containers running SageMath or Hashcat, directly from their terminal.
+
+This tool interacts with the Runpod API using GraphQL queries. It gets a fresh JWT token for every request, using the provided Clerk cookie and session ID. It relies on the [`reverse-ssh`](https://github.com/Fahrj/reverse-ssh) utility to establish a stable, interactive SSH shell: this is achieved by hosting the binary on a local web server, starting it in listening mode, and appending commands to the template Docker start arguments to download and execute this binary.
+
+This tool automatically terminates the rented instances on exit to ensure optimal cost efficiency.
+
+## 📦 Setup
 
 ### Infrastructure
 
 > [!IMPORTANT]
-> This tool must be run from a VPS with a public IP. It operates by starting a local web server to serve payloads and listening for incoming reverse SSH connections.
+> This tool must be run from a VPS with a public IP. It operates by starting a local web server to serve binaries and listening for incoming reverse SSH connections.
 
-Ensure the [`reverse-ssh`](https://github.com/Fahrj/reverse-ssh) binary is located at `/workspace/tooling/upx_reverse-sshx64` on your VPS. It should be built with public key access, with the corresponding private key on the VPS.
+* **Filesystem**: Ensure the [`reverse-ssh`](https://github.com/Fahrj/reverse-ssh) binary is located at `/workspace/tooling/upx_reverse-sshx64` on your VPS. The binary should be built with public key access, and the corresponding private key must be present on the VPS.
+* **Networking**: The orchestrator opens a local web server on port 80 and a listener on port 8889, so your firewall should accept connections to these ports.
 
 ### Installation
-
-Install directly from the source:
 
 ```bash
 pip install git+https://github.com/Eudaeon/runpod-orchestrator.git
 ```
 
-### Configuration
 
-The orchestrator requires the following environment variables to be set:
+## 🔧 Usage
+
+### SageMath (CPU)
+
+Deploys a CPU-based SageMath instance using the `cpu5c-2-4` ("Compute-Optimized") instance type.
+
+```bash
+runpod-orchestrator sage [FILES...]
+```
+
+**Arguments:**
+
+- `FILES` (Optional) - List of local files to automatically `scp` to the pod's `/workspace/` directory during deployment.
+
+### Hashcat (GPU)
+
+Deploys a GPU-based Hashcat instance with automated hardware validation.
+
+```bash
+runpod-orchestrator hashcat [FILES...] [options]
+```
+
+**Arguments:**
+
+- `FILES` (Optional) - List of local files to automatically `scp` to the pod's `/workspace/` directory during deployment.
+
+**Options:**
+
+- `--gpu <text>` - GPU Model to request (default: "RTX 4090").
+- `--cores <integer>` - Number of GPUs to provision (default: 1).
+
+The tool validates your requested core count against Runpod's available inventory before deployment to ensure the configuration is supported.
+
+## ⚙️ Configuration
+
+### Environment Variables
+
+The orchestrator requires the following variables to be set in your environment:
 
 |        Variable       |                      Description                      |
 |:---------------------:|:-----------------------------------------------------:|
@@ -40,25 +84,7 @@ The orchestrator requires the following environment variables to be set:
 > [!TIP]
 > To find your `RUNPOD_SESSION_ID` and `RUNPOD_CLERK_COOKIE`, inspect network requests to `clerk.runpod.io` in your browser's developer tools.
 
-## Usage
-
-### Sage (CPU)
-
-Deploys a CPU-based SageMath instance:
-
-```bash
-runpod-orchestrator sage [FILES...]
-```
-
-### Hashcat (GPU)
-
-Deploys a GPU-based Hashcat instance. Defaults to 1x RTX 4090 if no options are provided:
-
-```bash
-runpod-orchestrator hashcat [FILES...] --gpu "RTX A4000" --cores 2
-```
-
-## Benchmarks
+## 📊 Benchmarks
 
 ### Hashcat (GPU)
 
@@ -90,3 +116,14 @@ Benchmarks for cracking MD4 hashes (`hashcat -b -w 4`) on secure cloud instances
 |    RTX A6000    |  37.42 GH/s |  $0.49  |  76.37 GH/$ |
 |   RTX PRO 6000  | 121.80 GH/s |  $1.84  |  66.20 GH/$ |
 | RTX PRO 6000 WK | 140.60 GH/s |  $2.09  |  67.27 GH/$ |
+
+
+---
+
+<div align="center">
+
+**⭐ Star this repo if you find it helpful!**
+
+Made with ❤️ by [Eudaeon](https://github.com/Eudaeon)
+
+</div>
